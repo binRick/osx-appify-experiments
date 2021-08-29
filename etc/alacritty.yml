@@ -38,7 +38,7 @@ window:
   # If the position is not set, the window manager will handle the placement.
   position:
     x: 0
-    y: 50
+    y: 0
 
   # Window padding (changes require restart)
   #
