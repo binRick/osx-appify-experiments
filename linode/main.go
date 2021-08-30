@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"path/filepath"
-	"regexp"
 
 	"github.com/kevinburke/ssh_config"
 	"github.com/linode/linodego"
@@ -15,26 +14,6 @@ import (
 	"net/http"
 	"os"
 )
-
-var DEBUG_MODE = false
-var DEV_DOMAIN = os.Getenv("DEV_DOMAIN")
-var DEV_USER = `root`
-var LINODE_LABEL_PREFIX = fmt.Sprintf(`%s`, `f`)
-var LINODE_LABEL_REGEX = regexp.MustCompile("f[0-9].*")
-var vm_labels = []string{}
-
-type LinodeVM struct {
-	ID        int
-	Region    string
-	Image     string
-	IP        *net.IP
-	PrivateIP *net.IP
-	Type      string
-	Hostname  string
-	Label     string
-}
-
-var cfg *ssh_config.Config
 
 func f(err error) {
 	if err != nil {
@@ -86,6 +65,11 @@ Host %s
 }
 
 func (l *LinodeVM) IsConfigured() bool {
+	_cfg, err := parse_config()
+	if err != nil {
+		log.Fatal(err)
+	}
+	cfg = _cfg
 	hn, err := cfg.Get(l.Label, `Hostname`)
 	f(err)
 	return (hn == l.IP.String())
@@ -148,6 +132,7 @@ func main() {
 				}
 			}
 			if !lvm.IsConfigured() {
+				fmt.Println(`Appending`, l.Label, `to config`)
 				f(AppendToConfig(lvm.GetConfig()))
 			}
 		}
