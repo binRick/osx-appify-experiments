@@ -15,6 +15,18 @@ import (
 	"os"
 )
 
+func init() {
+	EnsureDirExists(filepath.Join(os.Getenv("HOME"), ".ssh", `config.d`))
+	if !FileExists(get_ssh_config_path()) {
+		ssh_f, err := os.Create(get_ssh_config_path())
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer ssh_f.Close()
+	}
+	//f(os.MkdirAll(paths.API_USAGE_DIR, 0700))
+}
+
 func f(err error) {
 	if err != nil {
 		log.Fatal(err)
@@ -80,7 +92,7 @@ func privateIPCheck(ip string) bool {
 	return ipAddress.IsPrivate()
 }
 func get_ssh_config_path() string {
-	return filepath.Join(os.Getenv("HOME"), ".ssh", "config")
+	return filepath.Join(os.Getenv("HOME"), ".ssh/config.d", fmt.Sprintf(`%s_%s`, "config", DEV_DOMAIN))
 }
 func parse_config() (*ssh_config.Config, error) {
 	f, err := os.Open(get_ssh_config_path())
